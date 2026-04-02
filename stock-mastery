@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Market Mastery</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0B0E11;
+  --surface: #131720;
+  --card: #1A1F2B;
+  --border: #252D3A;
+  --text: #E4E8EE;
+  --muted: #6B7A90;
+  --accent: #00D97E;
+  --accent2: #00B86B;
+  --gold: #F5A623;
+  --red: #FF4757;
+  --blue: #3EADFF;
+  --purple: #C678DD;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+}
+h1, h2, h3, h4, h5, h6 { font-family: 'Space Grotesk', sans-serif; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Layout */
+.app-wrap { display: flex; height: 100vh; }
+.sidebar {
+  width: 310px;
+  min-width: 310px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+.main { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+.top-bar {
+  flex-shrink: 0;
+  background: rgba(11, 14, 17, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+.scroll-area { flex: 1; overflow-y: auto; }
+
+/* Sidebar Nav */
+.ch-btn {
+  width: 100%;
+  text-align: left;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.ch-btn:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+.ch-btn.open { color: var(--accent); }
+.ch-icon {
+  width: 26px; height: 26px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; flex-shrink: 0; transition: all 0.2s;
+  background: var(--card); color: var(--muted);
+}
+.ch-btn.open .ch-icon { background: var(--accent); color: var(--bg); }
+.lessons-wrap { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+.lessons-wrap.open { max-height: 600px; }
+.ls-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 14px 8px 50px; cursor: pointer;
+  color: var(--muted); font-size: 12.5px;
+  transition: all 0.12s; border-left: 2px solid transparent;
+}
+.ls-item:hover { color: var(--text); background: rgba(255,255,255,0.015); }
+.ls-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(0,217,126,0.04); }
+.ls-item.done .dot { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; flex-shrink: 0; transition: all 0.2s;
+}
+.ls-item.active .dot { border-color: var(--accent); }
+
+/* Content Blocks */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+.key-box { padding: 13px 16px; background: rgba(0,217,126,0.06); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13.5px; line-height: 1.75; }
+.warn-box { padding: 13px 16px; background: rgba(255,71,87,0.06); border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; margin: 14px 0; font-size: 13.5px; line-height: 1.75; }
+.bullet-list { margin: 8px 0 14px; padding-left: 0; list-style: none; }
+.bullet-list li { font-size: 13.5px; line-height: 1.75; color: var(--text); opacity: 0.9; padding: 5px 0 5px 20px; position: relative; }
+.bullet-list li::before { content: ''; position: absolute; left: 2px; top: 13px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.6; }
+
+/* Tables */
+.dtable { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 10px 0; }
+.dtable th { text-align: left; padding: 9px 12px; background: var(--surface); color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; }
+.dtable td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); opacity: 0.85; }
+.dtable tr:hover td { background: rgba(255,255,255,0.015); }
+
+/* Quiz */
+.q-opt {
+  display: flex; align-items: center; gap: 11px;
+  padding: 12px 16px; background: var(--surface);
+  border: 1.5px solid var(--border); border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; margin: 6px 0; font-size: 13.5px;
+}
+.q-opt:hover { border-color: rgba(0,217,126,0.4); background: rgba(0,217,126,0.03); }
+.q-opt.picked { border-color: var(--accent); background: rgba(0,217,126,0.08); }
+.q-opt.right { border-color: var(--accent); background: rgba(0,217,126,0.14); pointer-events: none; }
+.q-opt.wrong { border-color: var(--red); background: rgba(255,71,87,0.1); pointer-events: none; }
+.q-circle {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; transition: all 0.15s;
+}
+.q-opt.picked .q-circle { border-color: var(--accent); background: var(--accent); color: var(--bg); }
+.q-opt.right .q-circle { border-color: var(--accent); background: var(--accent); color: var(--bg); }
+.q-opt.wrong .q-circle { border-color: var(--red); background: var(--red); color: #fff; }
+
+/* Buttons */
+.btn-g { padding: 11px 24px; background: var(--accent); color: var(--bg); border: none; border-radius: 7px; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13.5px; cursor: pointer; transition: all 0.15s; }
+.btn-g:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-g:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.btn-o { padding: 9px 20px; background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 7px; font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 12.5px; cursor: pointer; transition: all 0.15s; }
+.btn-o:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Gauge */
+.gauge-box { display: flex; align-items: center; gap: 14px; }
+@keyframes gpulse { 0%,100%{ filter: drop-shadow(0 0 6px rgba(0,217,126,0.2)); } 50%{ filter: drop-shadow(0 0 14px rgba(0,217,126,0.4)); } }
+.gauge-svg { animation: gpulse 3s infinite; }
+
+/* Animations */
+.fadein { animation: fadein 0.35s ease; }
+@keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.glow-line { height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); margin: 20px 0; opacity: 0.25; }
+.tag { display: inline-block; padding: 3px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 100; display: none; align-items: center; justify-content: center; }
+.modal-bg.show { display: flex; }
+
+/* Toast */
+.toast-el { position: fixed; bottom: 24px; right: 24px; padding: 12px 22px; border-radius: 8px; font-size: 13.5px; font-weight: 500; z-index: 200; transform: translateY(80px); opacity: 0; transition: all 0.35s ease; pointer-events: none; }
+.toast-el.vis { transform: translateY(0); opacity: 1; }
+.toast-el.ok { background: rgba(0,217,126,0.92); color: var(--bg); }
+.toast-el.err { background: rgba(255,71,87,0.92); color: #fff; }
+
+/* Mobile */
+.mob-btn { display: none; position: fixed; top: 10px; left: 10px; z-index: 50; width: 38px; height: 38px; border-radius: 7px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 15px; cursor: pointer; align-items: center; justify-content: center; }
+@media (max-width: 800px) {
+  .sidebar { position: fixed; left: 0; top: 0; z-index: 45; transform: translateX(-100%); }
+  .sidebar.mob-open { transform: translateX(0); }
+  .mob-btn { display: flex; }
+  .gauge-box { display: none !important; }
+  .scroll-area { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<button class="mob-btn" id="mobBtn"><i class="fas fa-bars"></i></button>
+
+<div class="app-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div style="padding: 16px 14px; border-bottom: 1px solid var(--border);">
+      <div style="display: flex; align-items: center; gap: 9px;">
+        <div style="width: 32px; height: 32px; border-radius: 7px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: var(--bg); font-weight: 700; font-size: 14px; font-family: 'Space Grotesk';">S</div>
+        <div>
+          <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px;">Stock Mastery</div>
+          <div style="font-size: 10.5px; color: var(--muted);">Complete Course</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding: 12px 14px; border-bottom: 1px solid var(--border);">
+      <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: var(--muted); margin-bottom: 5px;">
+        <span>Progress</span><span id="progTxt">0%</span>
+      </div>
+      <div style="height: 4px; background: var(--card); border-radius: 2px; overflow: hidden;">
+        <div id="progBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--gold)); border-radius: 2px; transition: width 0.5s ease;"></div>
+      </div>
+    </div>
+    <nav id="navBox" style="flex: 1; overflow-y: auto; padding: 6px 0;"></nav>
+    <div style="padding: 12px 14px; border-top: 1px solid var(--border);">
+      <button class="btn-o" style="width: 100%; font-size: 11.5px;" id="reportBtn">
+        <i class="fas fa-chart-radar" style="margin-right: 5px;"></i>Knowledge Report
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="top-bar">
+      <div id="breadcrumb" style="font-size: 11.5px; color: var(--muted);"></div>
+      <div class="gauge-box">
+        <div class="gauge-svg" style="position: relative; width: 58px; height: 33px;">
+          <svg viewBox="0 0 58 33" width="58" height="33">
+            <path d="M4 31 A25 25 0 0 1 54 31" fill="none" stroke="var(--border)" stroke-width="4" stroke-linecap="round"/>
+            <path id="gArc" d="M4 31 A25 25 0 0 1 54 31" fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-dasharray="79" stroke-dashoffset="79" style="transition: stroke-dashoffset 0.8s ease;"/>
+          </svg>
+          <div id="gVal" style="position: absolute; bottom: -1px; left: 50%; transform: translateX(-50%); font-family: 'Space Grotesk'; font-size: 10.5px; font-weight: 700; color: var(--accent);">0%</div>
+        </div>
+        <div style="font-size: 9.5px; color: var(--muted); line-height: 1.35;">
+          <div>Your Knowledge</div>
+          <div id="gPctTxt" style="color: var(--accent); font-weight: 600; font-size: 10px;">Top 90%+ of Indians</div>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-area" id="scrollArea">
+      <div id="content" style="max-width: 780px; margin: 0 auto; padding: 24px;"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Report Modal -->
+<div class="modal-bg" id="modal">
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 520px; width: 92%; max-height: 82vh; overflow-y: auto; position: relative;">
+    <button id="closeModal" style="position: absolute; top: 14px; right: 14px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px;"><i class="fas fa-times"></i></button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-el" id="toast"></div>
+
+<script>
+/* ========== DATA ========== */
+var DATA = [
+  {
+    title: "Introduction & Basics", icon: "fa-seedling", clr: "#00D97E",
+    lessons: [
+      {
+        title: "What is the Stock Market?", tag: "Foundation", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "Understanding the Stock Market" },
+          { t: "p", v: "The stock market is a platform where buyers and sellers trade shares of publicly listed companies. When you buy a stock, you own a small piece of that company." },
+          { t: "key", v: "Think of it like a marketplace \u2014 instead of buying vegetables, you\u2019re buying ownership in businesses like Reliance, TCS, or HDFC Bank." },
+          { t: "h3", v: "How Does It Work?" },
+          { t: "p", v: "Companies need money to grow. Instead of borrowing from banks, they list on the stock exchange and sell shares to the public. Investors buy these shares hoping the company grows, making their shares more valuable." },
+          { t: "p", v: "Prices move based on supply and demand \u2014 if more people want to buy than sell, the price rises, and vice versa." },
+          { t: "h3", v: "Major Indian Exchanges" },
+          { t: "table", h: ["Exchange", "Full Name", "Founded", "Key Index"], r: [
+            ["NSE", "National Stock Exchange", "1992", "Nifty 50"],
+            ["BSE", "Bombay Stock Exchange", "1875", "Sensex (30)"]
+          ]},
+          { t: "key", v: "NSE is India\u2019s largest exchange by trading volume. BSE is Asia\u2019s oldest stock exchange. Most trading happens on NSE." }
+        ]
+      },
+      {
+        title: "Investment Goals & Risk Tolerance", tag: "Planning", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Define Your Investment DNA" },
+          { t: "p", v: "Before investing a single rupee, answer three critical questions." },
+          { t: "h3", v: "1. What is Your Goal?" },
+          { t: "ul", v: ["Wealth creation over 10+ years (aggressive growth)", "Regular income through dividends (income generation)", "Capital preservation with modest growth (conservative)", "Saving for a specific goal: house, education, retirement"] },
+          { t: "h3", v: "2. What is Your Time Horizon?" },
+          { t: "table", h: ["Horizon", "Risk Level", "Suggested Approach"], r: [
+            ["Short-term (< 3 yrs)", "Low", "Fixed deposits, debt funds"],
+            ["Medium-term (3-7 yrs)", "Moderate", "Balanced funds, large-cap stocks"],
+            ["Long-term (7+ yrs)", "High", "Direct stocks, equity mutual funds, SIPs"]
+          ]},
+          { t: "h3", v: "3. What is Your Risk Tolerance?" },
+          { t: "p", v: "Risk tolerance is how much loss you can mentally and financially handle without panic-selling." },
+          { t: "key", v: "Rule of thumb: Never invest money you\u2019ll need in the next 3\u20135 years into stocks. The market is volatile short-term but rewards patience long-term." },
+          { t: "warn", v: "A common mistake: Young investors overestimate their risk tolerance. A 20% drop feels very different in reality than on paper." }
+        ]
+      },
+      {
+        title: "Stocks & Types of Stocks", tag: "Types", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "Understanding Stock Categories" },
+          { t: "p", v: "Not all stocks behave the same. Market capitalization helps you pick the right type." },
+          { t: "h3", v: "What is Market Cap?" },
+          { t: "p", v: "Market Cap = Current Share Price \u00d7 Total Number of Shares. It tells you the total value the market assigns to a company." },
+          { t: "table", h: ["Category", "Market Cap", "Characteristics"], r: [
+            ["Large-Cap", "> \u20b920,000 Cr", "Top 100 stocks. Stable, established, lower risk, steady dividends"],
+            ["Mid-Cap", "\u20b95,000\u201320,000 Cr", "Growth potential, moderate risk, higher volatility"],
+            ["Small-Cap", "< \u20b95,000 Cr", "High growth potential, very high risk, can be multi-baggers or zero-baggers"]
+          ]},
+          { t: "h3", v: "Other Stock Types" },
+          { t: "ul", v: ["Blue-chip Stocks: Market leaders with strong track records (Reliance, TCS, Infosys)", "Dividend Stocks: Companies sharing profits regularly (ITC, HUL, Coal India)", "Penny Stocks: Priced below \u20b910, extremely risky, mostly speculative \u2014 avoid as a beginner", "Growth Stocks: Companies growing revenue faster than market average"] },
+          { t: "key", v: "Beginners should start with large-cap stocks. They\u2019re the foundation \u2014 not exciting, but essential and stable." },
+          { t: "warn", v: "Small-cap and penny stocks are where most beginners lose money. The \u2018multi-bagger\u2019 stories are survivorship bias." }
+        ]
+      },
+      {
+        title: "Market Participants", tag: "Ecosystem", tagClr: "#C678DD",
+        blocks: [
+          { t: "h1", v: "Who Moves the Market?" },
+          { t: "p", v: "Understanding participants helps you understand price movements." },
+          { t: "h3", v: "Key Players" },
+          { t: "ul", v: [
+            "Retail Investors: Individual investors like you and me. ~8\u201310% of total volume but growing rapidly.",
+            "Institutional Investors: FIIs and DIIs (mutual funds, insurance companies). They move the market \u2014 a single FII sell order can crash a stock 5%.",
+            "Brokers: Intermediaries (Zerodha, Groww, Angel One) who provide the trading platform.",
+            "SEBI: Securities and Exchange Board of India \u2014 the market regulator, the referee who protects investors.",
+            "Market Makers: Entities providing liquidity by being ready to buy and sell at quoted prices."
+          ]},
+          { t: "key", v: "When you see \u2018FII net sellers today\u2019 in news \u2014 that\u2019s often why the market fell. Institutional flows drive Indian market trends significantly." },
+          { t: "h3", v: "Why SEBI Matters to You" },
+          { t: "p", v: "SEBI mandates brokers segregate client money, enforces disclosure norms, runs investor education, and penalizes insider trading. Without SEBI, the market would be the wild west." }
+        ]
+      },
+      {
+        title: "Market Indices \u2014 Sensex & Nifty", tag: "Benchmark", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "The Market\u2019s Report Card" },
+          { t: "p", v: "An index is a basket of selected stocks representing overall market performance \u2014 like a thermometer for the economy." },
+          { t: "table", h: ["Index", "Exchange", "Stocks", "Base Year", "Base Value"], r: [
+            ["Sensex", "BSE", "30", "1978-79", "100"],
+            ["Nifty 50", "NSE", "50", "1995", "1000"]
+          ]},
+          { t: "key", v: "Sensex crossed 80,000 in 2024 from a base of 100 \u2014 that\u2019s an 800x return over 45 years." },
+          { t: "h3", v: "How Indices Are Calculated" },
+          { t: "p", v: "Both use free-float market capitalization weighting. Only shares available for public trading (excluding promoter holdings) are counted." },
+          { t: "h3", v: "Why Indices Matter" },
+          { t: "ul", v: [
+            "Tell you whether the market is up or down at a glance",
+            "Professional fund managers are judged by whether they beat the index",
+            "Index funds and ETFs track these \u2014 you can invest in the whole market without picking stocks",
+            "Nifty 50 represents ~65% of total NSE market capitalization"
+          ]},
+          { t: "warn", v: "90% of actively managed mutual funds FAIL to beat Nifty 50 over 5+ years. This should make you respect the index." }
+        ]
+      },
+      {
+        title: "Opening a Demat & Trading Account", tag: "Practical", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "Your Gateway to the Stock Market" },
+          { t: "p", v: "You need two accounts: a Demat account (holds shares electronically, like a digital locker) and a Trading account (to place buy/sell orders)." },
+          { t: "h3", v: "Key Terms" },
+          { t: "ul", v: ["DP ID: Your unique depository participant identification", "NSDL/CDSL: Two depositories that hold your shares", "Broker: Connects you to the exchange", "UPI Mandate: Used for instant money transfer when buying"] },
+          { t: "h3", v: "Popular Brokers (2024)" },
+          { t: "table", h: ["Broker", "Equity Delivery", "Account Opening", "Best For"], r: [
+            ["Zerodha", "Zero", "\u20b9200", "Serious investors, low cost"],
+            ["Groww", "Zero", "Free", "Beginners, simple UI"],
+            ["Angel One", "Zero", "Free", "Research & tips"],
+            ["ICICI Direct", "0.5%", "\u20b90", "Banking integration"]
+          ]},
+          { t: "h3", v: "Documents Required" },
+          { t: "ul", v: ["PAN Card (mandatory)", "Aadhaar Card", "Bank account with net banking", "Passport-size photo", "Cancelled cheque / bank statement"] },
+          { t: "key", v: "Account opening is fully online now, takes 15\u201330 minutes. Start with Zerodha or Groww if you\u2019re a beginner." },
+          { t: "warn", v: "Never share your Demat login credentials. Brokerage apps will NEVER ask for your PIN or OTP via phone/email. Scams are rampant." }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Fundamental Analysis", icon: "fa-magnifying-glass-chart", clr: "#3EADFF",
+    lessons: [
+      {
+        title: "What is Fundamental Analysis?", tag: "Core Skill", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Evaluating the Real Worth of a Company" },
+          { t: "p", v: "Fundamental analysis evaluates a company\u2019s financial health, business quality, and growth potential to determine if its stock is undervalued or overvalued." },
+          { t: "key", v: "Warren Buffett\u2019s entire fortune is built on one principle: Find a wonderful company at a fair price, not a fair company at a wonderful price." },
+          { t: "h3", v: "Two Approaches" },
+          { t: "ul", v: [
+            "Top-Down: Economy \u2192 sector \u2192 best company. Example: India growing \u2192 infra booming \u2192 pick L&T or NTPC",
+            "Bottom-Up: Ignore macro, focus purely on individual company quality. This is Buffett\u2019s approach."
+          ]},
+          { t: "h3", v: "What FA Looks At" },
+          { t: "ul", v: ["Financial statements (Revenue, Profit, Debt)", "Business moat (competitive advantage)", "Management quality (promoter track record)", "Industry trends and growth potential", "Valuation (is the stock priced right?)"] },
+          { t: "p", v: "The goal: Buy a stock worth \u20b91,000 at \u20b9600, then wait for the market to recognize its true value." }
+        ]
+      },
+      {
+        title: "Reading Financial Statements", tag: "Essential", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "The Three Pillars of Company Financials" },
+          { t: "p", v: "Every listed company publishes three financial statements every quarter. Available on BSE/NSE, screener.in, and Ticker Tape." },
+          { t: "h3", v: "1. Profit & Loss Statement" },
+          { t: "p", v: "Shows how much money the company made or lost." },
+          { t: "ul", v: ["Revenue/Sales: Total money from products/services", "Operating Expenses: Raw materials, salaries, rent, marketing", "Operating Profit (EBIT): Revenue minus operating expenses", "Net Profit: What remains after tax and interest \u2014 THE most important number"] },
+          { t: "h3", v: "2. Balance Sheet" },
+          { t: "p", v: "A snapshot of what the company owns and owes." },
+          { t: "ul", v: ["Assets: Cash, inventory, property, equipment", "Liabilities: Loans, payables, deferred tax", "Shareholders\u2019 Equity: Assets minus Liabilities = Net Worth"] },
+          { t: "key", v: "A company with \u20b9100 cr profit but \u20b95,000 cr debt is like a person earning \u20b91 lakh/month owing \u20b950 lakhs on credit cards." },
+          { t: "h3", v: "3. Cash Flow Statement" },
+          { t: "p", v: "Shows actual cash movement \u2014 more reliable than profit because profits can be manipulated but cash can\u2019t." },
+          { t: "ul", v: ["Operating Cash Flow: Cash from core business (positive = healthy)", "Investing Cash Flow: Cash spent on or received from assets", "Financing Cash Flow: Cash from loans, equity, dividends"] },
+          { t: "warn", v: "If a company reports high profits but negative operating cash flow for years \u2014 red flag. Profits can be \u2018managed\u2019, cash cannot." }
+        ]
+      },
+      {
+        title: "Key Financial Ratios", tag: "Numbers", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "The Numbers That Reveal Everything" },
+          { t: "p", v: "Ratios help compare companies across sizes and sectors." },
+          { t: "table", h: ["Ratio", "Formula", "Good Range", "What It Tells You"], r: [
+            ["PE Ratio", "Price / EPS", "10\u201325", "How much you pay for \u20b91 of earnings"],
+            ["ROE", "Net Profit / Equity", "> 15%", "How efficiently company uses your money"],
+            ["EPS", "Net Profit / Shares", "Growing YoY", "Profit per share you own"],
+            ["Debt-to-Equity", "Debt / Equity", "< 0.5", "How much debt vs owned capital"],
+            ["Dividend Yield", "Dividend / Price", "> 1.5%", "Income just by holding"],
+            ["Current Ratio", "Curr. Assets / Curr. Liab.", "> 1.5", "Can it pay short-term bills?"],
+            ["P/B Ratio", "Price / Book Value/share", "< 3", "Price vs actual asset value"]
+          ]},
+          { t: "h3", v: "Using PE Ratio Smartly" },
+          { t: "p", v: "PE of 15 doesn\u2019t mean \u2018cheap\u2019 \u2014 a slow-growing company at PE 15 is expensive, while a fast-growing one at PE 30 might be cheap. Always compare with sector average and historical PE." },
+          { t: "key", v: "ROE is the single most powerful ratio. A company consistently delivering ROE > 20% for 5+ years is almost always a quality business." },
+          { t: "warn", v: "Don\u2019t obsess over a single ratio. A low PE might mean the market sees trouble ahead. Always look at the full picture." }
+        ]
+      },
+      {
+        title: "Identifying Quality Companies", tag: "Selection", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "What Separates Great from Good" },
+          { t: "h3", v: "The Economic Moat" },
+          { t: "p", v: "A moat is a sustainable competitive advantage protecting profits from competitors." },
+          { t: "ul", v: [
+            "Brand Power: People pay premium for the name (Titan, Asian Paints, HUL)",
+            "Switching Cost: Too painful for customers to leave (TCS for enterprise clients)",
+            "Network Effect: Product gets better as more people use it",
+            "Cost Advantage: Can produce cheaper than rivals (Reliance\u2019s scale)",
+            "Intangible Assets: Patents, licenses, regulatory approvals"
+          ]},
+          { t: "h3", v: "Management Quality Checklist" },
+          { t: "ul", v: [
+            "Promoter holding > 50%: Usually aligned with shareholders (but watch for pledged shares)",
+            "Salary vs profit: Is CEO taking 10% of profit as salary? Red flag",
+            "Capital allocation: Reinvesting wisely or empire-building acquisitions?",
+            "Transparency: Do annual report letters address problems honestly?",
+            "History: Have they navigated crises well?"
+          ]},
+          { t: "key", v: "Test: Can you explain in 2 sentences why this company will be more profitable 5 years from now? If not, don\u2019t invest." },
+          { t: "h3", v: "Sector Thinking" },
+          { t: "p", v: "Some sectors are structurally growing (IT, pharma, infra), some are cyclical (cement, auto), some are declining. Pick sectors with tailwinds, then the best company within." }
+        ]
+      },
+      {
+        title: "Red Flags & Avoiding Bad Stocks", tag: "Protection", tagClr: "#FF4757",
+        blocks: [
+          { t: "h1", v: "How to Spot a Value Trap" },
+          { t: "p", v: "More money is lost buying bad companies at \u2018cheap\u2019 prices than good companies at \u2018expensive\u2019 prices." },
+          { t: "h3", v: "Financial Red Flags" },
+          { t: "ul", v: [
+            "Rising debt while profits stagnate or fall",
+            "Operating cash flow consistently lower than net profit",
+            "Revenue growing but margins shrinking",
+            "Frequent related-party transactions",
+            "Auditor changes without clear reason"
+          ]},
+          { t: "h3", v: "Corporate Governance Red Flags" },
+          { t: "ul", v: [
+            "Promoter pledge of shares > 50%",
+            "Unqualified relatives in key positions",
+            "Executive compensation growing faster than profit",
+            "Company always finds \u2018one-time reasons\u2019 for poor performance",
+            "Frequent equity dilution"
+          ]},
+          { t: "warn", v: "Satyam, IL&FS, DHFL \u2014 all looked \u2018cheap\u2019 before collapsing. A low PE is NOT a reason to buy. It\u2019s a reason to investigate." },
+          { t: "key", v: "Simplest filter: Check screener.in for \u2018pledged shares %\u2019. If above 30%, skip. No exceptions for beginners." }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Technical Analysis", icon: "fa-chart-line", clr: "#F5A623",
+    lessons: [
+      {
+        title: "What is Technical Analysis?", tag: "Optional", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "Reading the Market\u2019s Mood" },
+          { t: "p", v: "While fundamental analysis asks WHAT to buy, technical analysis asks WHEN to buy. It studies price and volume patterns to predict short-term movements." },
+          { t: "key", v: "Technical analysis does NOT tell you if a company is good or bad. It only indicates if the price is likely to go up or down near-term based on historical patterns." },
+          { t: "h3", v: "Core Assumptions" },
+          { t: "ul", v: ["Price discounts everything: All news, earnings, emotions are in the price", "Prices move in trends: Once a trend starts, it tends to continue", "History repeats itself: Human psychology creates recognizable patterns"] },
+          { t: "h3", v: "For Beginners" },
+          { t: "p", v: "Don\u2019t spend more than 10% of your learning time on TA initially. Many successful long-term investors never use it. Learn FA first, then add TA as a supplementary tool." },
+          { t: "warn", v: "TA can give false signals frequently. Never use TA alone to make investment decisions. Always combine with fundamental analysis." }
+        ]
+      },
+      {
+        title: "Price Charts & Candlestick Basics", tag: "Charts", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "Learning to Read Candlesticks" },
+          { t: "p", v: "A candlestick shows 4 data points: Open, High, Low, Close (OHLC)." },
+          { t: "h3", v: "Anatomy of a Candlestick" },
+          { t: "ul", v: [
+            "Green candle: Close > Open (bullish, price went up)",
+            "Red candle: Close < Open (bearish, price went down)",
+            "Body: The thick part = range between open and close",
+            "Upper wick: Highest price during the period",
+            "Lower wick: Lowest price during the period"
+          ]},
+          { t: "key", v: "A long lower wick on a red candle = sellers tried to push price down but buyers fought back. This is called a \u2018hammer\u2019 \u2014 a potential reversal signal." },
+          { t: "h3", v: "Key Candlestick Patterns" },
+          { t: "table", h: ["Pattern", "Appearance", "Signal"], r: [
+            ["Hammer", "Long lower wick, small body at top", "Bullish reversal after downtrend"],
+            ["Shooting Star", "Long upper wick, small body at bottom", "Bearish reversal after uptrend"],
+            ["Engulfing", "Large candle covers previous one", "Strong reversal signal"],
+            ["Doji", "Open \u2248 Close, flat body", "Indecision \u2014 trend may change"]
+          ]},
+          { t: "p", v: "Timeframes: 1-min for intraday, daily for swing trading, weekly for investing. Beginners should look at daily and weekly only." }
+        ]
+      },
+      {
+        title: "Support, Resistance & Trendlines", tag: "Levels", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "The Invisible Walls of Trading" },
+          { t: "h3", v: "Support" },
+          { t: "p", v: "A price level where demand is strong enough to prevent further decline. Think of it as a floor \u2014 the price keeps bouncing off it." },
+          { t: "h3", v: "Resistance" },
+          { t: "p", v: "A price level where selling pressure prevents further rise. Think of it as a ceiling." },
+          { t: "key", v: "When support breaks, it often becomes new resistance (and vice versa). A stock bouncing off \u20b9500 three times, then falling below, will find \u20b9500 a ceiling on recovery." },
+          { t: "h3", v: "Trendlines" },
+          { t: "p", v: "Draw a line connecting at least 2 swing lows (uptrend) or swing highs (downtrend). More touches = stronger trendline. A break below an uptrend line = trend may be reversing." },
+          { t: "warn", v: "Support and resistance are zones, not exact numbers. Think \u20b9495\u2013505 as a support zone, not \u2018\u20b9498.5 is support\u2019." }
+        ]
+      },
+      {
+        title: "Moving Averages & Indicators", tag: "Tools", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Smoothing Out the Noise" },
+          { t: "h3", v: "Moving Averages" },
+          { t: "table", h: ["Type", "Timeframe", "Use"], r: [
+            ["SMA 20", "Short-term", "Quick trend direction"],
+            ["SMA 50", "Medium-term", "Support in uptrends, widely watched"],
+            ["SMA 200", "Long-term", "Institutional benchmark, major S/R"],
+            ["EMA 20", "Short-term", "More responsive than SMA"]
+          ]},
+          { t: "key", v: "Golden Cross (50-day crosses above 200-day MA) = bullish signal. Death Cross (opposite) = bearish. Works better on indices than individual stocks." },
+          { t: "h3", v: "RSI (Relative Strength Index)" },
+          { t: "p", v: "Scale 0\u2013100. Above 70 = overbought (may fall), Below 30 = oversold (may rise). But in strong trends, RSI can stay extreme for weeks." },
+          { t: "h3", v: "MACD" },
+          { t: "p", v: "Shows relationship between two moving averages. MACD line crosses above signal line = bullish, below = bearish." },
+          { t: "warn", v: "Indicators lag \u2014 they confirm what happened, not predict the future. Use 2\u20133 max. Too many create contradictory signals." }
+        ]
+      },
+      {
+        title: "Using TA to Time Entry/Exit", tag: "Application", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "Putting It All Together" },
+          { t: "h3", v: "Step-by-Step Process" },
+          { t: "ul", v: [
+            "Step 1: Use FA to find a good company",
+            "Step 2: Check weekly chart \u2014 is it in an uptrend?",
+            "Step 3: Look for pullback to support or a key moving average",
+            "Step 4: Wait for bullish candlestick pattern at support",
+            "Step 5: Enter with stop loss just below support",
+            "Step 6: Set target at next resistance or use trailing stop loss"
+          ]},
+          { t: "key", v: "Ideal entry = Good company (FA) + Pullback to support in uptrend (TA). This combination gives highest probability of success." },
+          { t: "h3", v: "Volume \u2014 The Most Underused Confirmation" },
+          { t: "p", v: "Breakout above resistance on high volume = genuine. Breakout on low volume = likely false. Always check volume to confirm price moves." },
+          { t: "warn", v: "Even with perfect TA, you\u2019ll be wrong 40\u201350% of the time. The secret: cut losses quickly and let winners run." }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Risk Management & Strategy", icon: "fa-shield-halved", clr: "#FF4757",
+    lessons: [
+      {
+        title: "Importance of Risk Management", tag: "Critical", tagClr: "#FF4757",
+        blocks: [
+          { t: "h1", v: "The Most Important Chapter" },
+          { t: "p", v: "You can be right about 70% of picks and still lose money without risk management. It separates survivors from blowups." },
+          { t: "key", v: "Professional traders focus on \u2018how much can I lose?\u2019 before \u2018how much can I make?\u2019. Amateurs do the opposite." },
+          { t: "h3", v: "The Math of Losses" },
+          { t: "table", h: ["If You Lose", "You Need to Gain"], r: [
+            ["10%", "11.1%"], ["25%", "33.3%"], ["50%", "100%"], ["75%", "300%"], ["90%", "900%"]
+          ]},
+          { t: "warn", v: "Lose 50% and you need 100% gain just to break even. Capital preservation is more important than capital appreciation." },
+          { t: "h3", v: "Position Sizing" },
+          { t: "p", v: "Never put more than 5\u201310% of portfolio in a single stock. With \u20b91,00,000, no stock should get more than \u20b95,000\u201310,000." }
+        ]
+      },
+      {
+        title: "Diversification & Allocation", tag: "Strategy", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Don\u2019t Put All Eggs in One Basket" },
+          { t: "h3", v: "Good Diversification" },
+          { t: "ul", v: [
+            "5\u201310 stocks across 4\u20135 different sectors",
+            "Mix of large-cap (60\u201370%) and mid-cap (20\u201330%)",
+            "1\u20132 defensive stocks (ITC, HUL, Pharma)",
+            "Consider index funds/ETFs as core holding"
+          ]},
+          { t: "h3", v: "Asset Allocation by Age" },
+          { t: "table", h: ["Age", "Equity %", "Debt/FD %", "Gold %"], r: [
+            ["20\u201330", "70\u201380%", "15\u201320%", "5\u201310%"],
+            ["30\u201340", "60\u201370%", "20\u201330%", "5\u201310%"],
+            ["40\u201350", "50\u201360%", "30\u201340%", "5\u201310%"],
+            ["50+", "30\u201340%", "50\u201360%", "5\u201310%"]
+          ]},
+          { t: "key", v: "Old formula: Equity % = 100 \u2013 Your Age. At 25, keep 75% in equity. Simplistic but a decent starting point." },
+          { t: "warn", v: "Owning 5 IT stocks is NOT diversification \u2014 that\u2019s sector concentration. A sector crash hits all of them." }
+        ]
+      },
+      {
+        title: "Stop Loss, Take Profit & Exiting", tag: "Execution", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "Knowing When to Leave the Party" },
+          { t: "h3", v: "Stop Loss (SL)" },
+          { t: "p", v: "A predetermined price to sell and limit losses." },
+          { t: "ul", v: [
+            "Short-term trades: 2\u20133% below entry",
+            "Investments: 10\u201315% below entry or below key support",
+            "Trailing SL: Move SL up as stock rises. Bought at \u20b9100 SL \u20b995, stock goes to \u20b9120, move SL to \u20b9110"
+          ]},
+          { t: "h3", v: "Take Profit (TP)" },
+          { t: "ul", v: [
+            "Fixed target: Sell 50% at first resistance, rest at next level",
+            "Trailing: Hold until trend breaks (closing below 50-DMA)"
+          ]},
+          { t: "key", v: "The 2:1 Rule: Only enter if potential profit is at least 2x potential loss. Risk \u20b95 to make \u20b910. With 50% win rate, you\u2019re still profitable." },
+          { t: "warn", v: "Biggest mistake: Removing stop loss thinking \u2018it\u2019ll come back\u2019. Sometimes it doesn\u2019t (Vodafone Idea, Yes Bank). Stick to your SL." }
+        ]
+      },
+      {
+        title: "Avoiding Common Mistakes", tag: "Wisdom", tagClr: "#FF4757",
+        blocks: [
+          { t: "h1", v: "Learn From Others\u2019 Expensive Lessons" },
+          { t: "h3", v: "The Deadly Sins" },
+          { t: "ul", v: [
+            "Chasing Telegram/YouTube tips: Tip providers earn from subscriptions, not trading",
+            "Overtrading: More trades = more brokerage + more mistakes + more tax",
+            "Averaging down blindly: Only average down if original thesis is intact",
+            "Leverage/F&O as beginner: 90% of retail F&O traders lose money (SEBI report)",
+            "Ignoring taxes: STCG <1yr = 20%, LTCG >1yr = 12.5% above \u20b91.25L gain",
+            "Checking portfolio daily: Leads to emotional decisions",
+            "Selling winners early, holding losers: The disposal effect"
+          ]},
+          { t: "key", v: "The investor who buys 5 good stocks and does NOTHING for 3 years will likely outperform the daily trader following 10 Telegram channels." },
+          { t: "warn", v: "If someone promises \u2018guaranteed returns\u2019 or \u201830% monthly returns\u2019 \u2014 it\u2019s a scam. Best investors average 15\u201320% annually." }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Investment Psychology", icon: "fa-brain", clr: "#C678DD",
+    lessons: [
+      {
+        title: "Greed vs Fear \u2014 Behavioural Biases", tag: "Mindset", tagClr: "#C678DD",
+        blocks: [
+          { t: "h1", v: "Your Biggest Enemy Is You" },
+          { t: "p", v: "The stock market is where people run from cheap prices (fear) and flock to expensive ones (greed). Understanding biases is the edge most lack." },
+          { t: "h3", v: "Common Cognitive Biases" },
+          { t: "ul", v: [
+            "Confirmation Bias: Seeking news that agrees with your view",
+            "Anchoring: Fixating on the price you paid",
+            "Recency Bias: Giving too much weight to recent events",
+            "Herd Mentality: Buying because everyone else is buying",
+            "Sunk Cost Fallacy: Holding losers hoping to recover"
+          ]},
+          { t: "key", v: "Buffett: \u2018Be fearful when others are greedy, and greedy when others are fearful.\u2019 In March 2020, the fearful sold. The greedy made 100\u2013300% in 18 months." }
+        ]
+      },
+      {
+        title: "Long-term vs Short-term Mindset", tag: "Perspective", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Time Is the Investor\u2019s Best Friend" },
+          { t: "h3", v: "The Compounding Reality" },
+          { t: "p", v: "\u20b910,000 invested monthly at 15% annual returns:" },
+          { t: "table", h: ["Period", "Invested", "Portfolio Value", "Wealth Created"], r: [
+            ["5 years", "\u20b96 Lakh", "\u20b98.9 Lakh", "\u20b92.9 Lakh"],
+            ["10 years", "\u20b912 Lakh", "\u20b927.8 Lakh", "\u20b915.8 Lakh"],
+            ["15 years", "\u20b918 Lakh", "\u20b965.4 Lakh", "\u20b947.4 Lakh"],
+            ["20 years", "\u20b924 Lakh", "\u20b91.5 Cr", "\u20b91.26 Cr"],
+            ["25 years", "\u20b930 Lakh", "\u20b93.3 Cr", "\u20b93.0 Cr"]
+          ]},
+          { t: "key", v: "Notice how wealth EXPLODES in later years. First 10 years create \u20b915.8L, next 10 create \u20b91.2 Cr \u2014 same monthly investment. Your patience is literally worth crores." },
+          { t: "h3", v: "Why Short-term Trading Fails" },
+          { t: "ul", v: [
+            "Competing with algorithms and institutional traders",
+            "Transaction costs eat into small gains",
+            "Tax disadvantage: STCG 20% vs LTCG 12.5%",
+            "Emotional exhaustion leads to poor decisions"
+          ]}
+        ]
+      },
+      {
+        title: "Patience, Discipline & Emotional Control", tag: "Mastery", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "The Boring Path to Wealth" },
+          { t: "h3", v: "Building Discipline" },
+          { t: "ul", v: [
+            "Written investment plan: What to buy, at what price, how much, when to sell",
+            "Follow your process, not your gut",
+            "Maintain an investment journal: Write WHY you bought each stock",
+            "Set rules: \u2018No tips.\u2019 \u2018Always use stop loss.\u2019 \u2018Review monthly, not daily.\u2019"
+          ]},
+          { t: "h3", v: "Handling Drawdowns" },
+          { t: "p", v:"Even the best portfolios have periods of -20% to -30%. This is NORMAL." },
+          { t: "ul", v: [
+            "Nifty fell 38% in March 2020 \u2014 recovered by November 2020",
+            "Nifty fell 15% in 2022 \u2014 then made new highs in 2023-24"
+          ]},
+          { t: "key", v: "The stock market transfers money from the impatient to the patient. If you can sit through a 20% drawdown without selling, you\u2019re ahead of 95% of investors." },
+          { t: "h3", v: "Final Wisdom" },
+          { t: "p", v: "The best investors are boring. They buy good companies, don\u2019t chase trends, and let compounding work. Excitement in investing usually equals losing money. Boring equals wealth." }
+        ]
+      }
+    ]
+  },
+  {
+    title: "Building & Monitoring Your Portfolio", icon: "fa-briefcase", clr: "#00D97E",
+    lessons: [
+      {
+        title: "How Much to Invest & Starting Small", tag: "Action", tagClr: "#00D97E",
+        blocks: [
+          { t: "h1", v: "Your First Investment Decision" },
+          { t: "h3", v: "How Much Should You Invest?" },
+          { t: "ul", v: [
+            "Emergency fund first: 6 months expenses in savings/liquid fund BEFORE investing",
+            "Start with whatever you can: Even \u20b9500/month through SIPs is valid",
+            "Increase gradually: Raise investment 5\u201310% every year as income grows",
+            "Rule: Invest at least 20% of income"
+          ]},
+          { t: "h3", v: "Starting Strategy" },
+          { t: "ul", v: [
+            "Month 1\u20133: Invest only in Nifty 50 Index Fund. Get comfortable with volatility",
+            "Month 4\u20136: Study 5\u201310 large-cap stocks. Paper trade",
+            "Month 7+: First direct stock purchase with small amount (\u20b92,000\u20135,000)",
+            "Gradually shift to 60% index funds, 40% direct stocks over 1\u20132 years"
+          ]},
+          { t: "key", v: "Your first investment should be boring (index fund), not exciting. Prove you can handle volatility before picking stocks directly." },
+          { t: "warn", v: "Never borrow to invest. Never use credit card EMIs. The market can stay irrational longer than you can stay solvent." }
+        ]
+      },
+      {
+        title: "Selecting 5\u201310 Stocks", tag: "Portfolio", tagClr: "#3EADFF",
+        blocks: [
+          { t: "h1", v: "Building Your Core Portfolio" },
+          { t: "h3", v: "Ideal First Portfolio Structure" },
+          { t: "table", h: ["Slot", "Type", "Examples", "Allocation"], r: [
+            ["1\u20132", "Large-cap Blue-chip", "Reliance, TCS, HDFC Bank", "30%"],
+            ["2\u20133", "Consistent Compounders", "Pidilite, Asian Paints, Titan", "25%"],
+            ["1\u20132", "Growing Mid-cap", "Clean Science, Dixon Tech", "20%"],
+            ["1", "Dividend/Defensive", "ITC, HUL, Coal India", "15%"],
+            ["0\u20131", "High-conviction bet", "(After 1+ year experience)", "10%"]
+          ]},
+          { t: "h3", v: "Selection Checklist (Must Pass ALL)" },
+          { t: "ul", v: [
+            "Profitable for at least 5 consecutive years",
+            "ROE > 15% for last 3 years",
+            "Debt-to-equity < 0.5",
+            "Revenue and profit growing at 10%+ CAGR",
+            "Promoter pledge < 10%",
+            "No corporate governance issues",
+            "Simple business you can understand"
+          ]},
+          { t: "key", v: "You don\u2019t need the \u2018best\u2019 stock. You need to avoid the \u2018worst\u2019 ones. 7 decent companies beat 1 genius pick + 6 losers." },
+          { t: "warn", v: "Don\u2019t rush to fill all slots. 3 well-researched stocks beat 10 half-researched ones." }
+        ]
+      },
+      {
+        title: "Portfolio Tracking & Review", tag: "Monitoring", tagClr: "#F5A623",
+        blocks: [
+          { t: "h1", v: "Watch the Business, Not the Price" },
+          { t: "h3", v: "What to Track" },
+          { t: "ul", v: [
+            "Quarterly results: Revenue, profit, margins vs expectations",
+            "Management commentary from earnings calls",
+            "Sector news: Policy changes, regulations, global trends",
+            "Peer comparison: How your company does vs competitors"
+          ]},
+          { t: "h3", v: "Review Frequency" },
+          { t: "table", h: ["Activity", "How Often", "Note"], r: [
+            ["Check prices", "Weekly or less", "Daily checking leads to panic"],
+            ["Read results", "Every 3 months", "Compare with 4\u20138 prior quarters"],
+            ["Full review", "Every 6 months", "Allocation, performance, thesis"],
+            ["Deep re-eval", "Annually", "Should I sell any holding?"]
+          ]},
+          { t: "key", v: "Tools: Ticker Tape (app), Moneycontrol (web), Screener.in (data), TradingView (charts). Set up a Google Sheet to track buys, sells, and current value." },
+          { t: "warn", v: "Checking prices more than once a day? You\u2019re not investing \u2014 you\u2019re gambling. Daily movements are noise, not signal." }
+        ]
+      },
+      {
+        title: "Rebalancing Your Portfolio", tag: "Maintenance", tagClr: "#C678DD",
+        blocks: [
+          { t: "h1", v: "Tuning Your Portfolio Engine" },
+          { t: "h3", v: "What is Rebalancing?" },
+          { t: "p", v: "Over time, some stocks grow faster, distorting allocation. Rebalancing = selling some winners and buying more underperformers to restore target allocation." },
+          { t: "h3", v: "Example" },
+          { t: "p", v: "Started with equal \u20b910,000 in 5 stocks. After a year, one doubled to \u20b920,000, another fell to \u20b97,000. Now 33% in one stock. Rebalance by selling some of the winner and buying more of the laggard." },
+          { t: "h3", v: "When to Rebalance" },
+          { t: "ul", v: [
+            "Any single stock exceeds 25\u201330% of portfolio",
+            "Equity-debt allocation drifts more than 5% from target",
+            "Original investment thesis changes for a stock",
+            "Annually at minimum"
+          ]},
+          { t: "h3", v: "When to SELL" },
+          { t: "ul", v: [
+            "Fundamental deterioration: Declining margins, rising debt, market share loss",
+            "Absurd valuation: 3x historical PE with no growth change",
+            "Better opportunity elsewhere",
+            "Error in original analysis"
+          ]},
+          { t: "key", v: "Selling is harder than buying because it requires admitting mistakes or letting go of winners. Disciplined selling separates good from great investors." },
+          { t: "p", v: "Congratulations \u2014 you\u2019ve completed the entire course. You now know more about stock market investing than 95%+ of the Indian population. The next step: actually do it. Start small, stay consistent, be patient." }
+        ]
+      }
+    ]
+  }
+];
+
+/* Quiz data keyed by chapter index */
+var QUIZZES = {
+  0: [
+    { q: "What are the two major stock exchanges in India?", o: ["NSE & BSE", "NYSE & NASDAQ", "LSE & TSE", "NSE & NYSE"], a: 0 },
+    { q: "What does 'market capitalization' mean?", o: ["Total profit of a company", "Total debt of a company", "Share price \u00d7 total shares", "Government tax on stocks"], a: 2 },
+    { q: "Who regulates Indian stock markets?", o: ["RBI", "SEBI", "IRDA", "AMFI"], a: 1 }
+  ],
+  1: [
+    { q: "Which statement shows actual cash movement?", o: ["P&L Statement", "Balance Sheet", "Cash Flow Statement", "Annual Report"], a: 2 },
+    { q: "Consistently high ROE (>20%) indicates what?", o: ["High debt", "Efficient use of equity", "High dividends", "Overvaluation"], a: 1 },
+    { q: "Biggest red flag in financial statements?", o: ["High revenue growth", "Positive operating cash flow", "Rising debt with stagnant profits", "Increasing dividends"], a: 2 }
+  ],
+  2: [
+    { q: "What does a green candlestick mean?", o: ["Close < Open", "Close > Open", "Open = Close", "Volume increased"], a: 1 },
+    { q: "RSI above 70 indicates what?", o: ["Oversold", "Overbought", "Uptrend", "High volume"], a: 1 },
+    { q: "What is 'support' in TA?", o: ["A price ceiling", "A price floor where buying emerges", "A stop loss type", "An indicator"], a: 1 }
+  ],
+  3: [
+    { q: "Lose 50% of capital \u2014 how much to break even?", o: ["50%", "75%", "100%", "200%"], a: 2 },
+    { q: "Max recommended allocation to one stock?", o: ["25%", "15%", "5\u201310%", "50%"], a: 2 },
+    { q: "What is the 2:1 rule?", o: ["2x equity vs debt", "Profit target = 2x risk", "Hold 2 years minimum", "Buy 2 stocks minimum"], a: 1 }
+  ],
+  4: [
+    { q: "Which bias makes investors chase rising stocks?", o: ["Anchoring", "Recency bias", "Sunk cost fallacy", "Confirmation bias"], a: 1 },
+    { q: "LTCG tax rate above \u20b91.25L in India?", o: ["10%", "12.5%", "15%", "20%"], a: 1 },
+    { q: "Nifty fell how much in March 2020?", o: ["15%", "25%", "38%", "50%"], a: 2 }
+  ],
+  5: [
+    { q: "How much emergency fund before investing?", o: ["1 month expenses", "3 months", "6 months", "12 months"], a: 2 },
+    { q: "Minimum ROE for a quality stock?", o: ["5%", "10%", "15%", "25%"], a: 2 },
+    { q: "When should you rebalance?", o: ["Weekly", "When any stock >25\u201330% allocation", "Stock falls 5%", "Only during crashes"], a: 1 }
+  ]
+};
+
+/* ========== STATE ========== */
+var S = { ci: 0, li: 0, done: {}, scores: {}, openCh: 0 };
+try {
+  var sv = JSON.parse(localStorage.getItem("smState"));
+  if (sv) { S.done = sv.done || {}; S.scores = sv.scores || {}; S.ci = sv.ci || 0; S.li = sv.li || 0; S.openCh = sv.openCh || 0; }
+} catch(e) {}
+function save() { localStorage.setItem("smState", JSON.stringify(S)); }
+function key(ci, li) { return ci + "-" + li; }
+function totalLessons() { var n = 0; DATA.forEach(function(c){ n += c.lessons.length; }); return n; }
+function doneCount() { return Object.keys(S.done).length; }
+function isLastLesson(ci, li) { return li === DATA[ci].lessons.length - 1; }
+
+/* ========== TOAST ========== */
+var toastTimer = null;
+function toast(msg, ok) {
+  var el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast-el " + (ok ? "ok" : "err") + " vis";
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove("vis"); }, 2800);
+}
+
+/* ========== NAV ========== */
+function buildNav() {
+  var box = document.getElementById("navBox");
+  var h = "";
+  DATA.forEach(function(ch, ci) {
+    var isOpen = S.openCh === ci;
+    var dc = 0;
+    ch.lessons.forEach(function(_, li) { if (S.done[key(ci, li)]) dc++; });
+    h += '<button class="ch-btn' + (isOpen ? " open" : "") + '" data-ci="' + ci + '">'
+      + '<div class="ch-icon"><i class="fas ' + ch.icon + '"></i></div>'
+      + '<div style="flex:1"><div style="font-size:10.5px;opacity:.45;margin-bottom:1px">Chapter ' + (ci+1) + '</div><div>' + ch.title + '</div></div>'
+      + '<div style="font-size:10px;color:var(--muted)">' + dc + '/' + ch.lessons.length + '</div>'
+      + '<i class="fas fa-chevron-down" style="font-size:8px;color:var(--muted);transition:transform .25s;' + (isOpen ? "transform:rotate(180deg)" : "") + '"></i>'
+      + '</button>'
+      + '<div class="lessons-wrap' + (isOpen ? " open" : "") + '">';
+    ch.lessons.forEach(function(ls, li) {
+      var k = key(ci, li);
+      var isDone = !!S.done[k];
+      var isAct = S.ci === ci && S.li === li;
+      h += '<div class="ls-item' + (isAct ? " active" : "") + (isDone ? " done" : "") + '" data-ci="' + ci + '" data-li="' + li + '">'
+        + '<div class="dot">' + (isDone ? '<i class="fas fa-check"></i>' : '') + '</div>'
+        + '<span>' + ls.title + '</span></div>';
+    });
+    h += '</div>';
+  });
+  box.innerHTML = h;
+
+  /* Event delegation */
+  box.onclick = function(e) {
+    var btn = e.target.closest(".ch-btn");
+    if (btn) {
+      var ci = parseInt(btn.dataset.ci);
+      S.openCh = S.openCh === ci ? -1 : ci;
+      save(); buildNav();
+      return;
+    }
+    var item = e.target.closest(".ls-item");
+    if (item) {
+      go(parseInt(item.dataset.ci), parseInt(item.dataset.li));
+    }
+  };
+}
+
+/* ========== NAVIGATE ========== */
+function go(ci, li) {
+  S.ci = ci; S.li = li; S.openCh = ci;
+  save(); buildNav(); render(); updateProg(); updateGauge();
+  document.getElementById("sidebar").classList.remove("mob-open");
+}
+function goPrev() {
+  if (S.li > 0) go(S.ci, S.li - 1);
+  else if (S.ci > 0) go(S.ci - 1, DATA[S.ci - 1].lessons.length - 1);
+}
+
+/* ========== PROGRESS ========== */
+function updateProg() {
+  var pct = Math.round(doneCount() / totalLessons() * 100);
+  document.getElementById("progBar").style.width = pct + "%";
+  document.getElementById("progTxt").textContent = pct + "%";
+}
+
+/* ========== GAUGE ========== */
+function getKnowledge() {
+  var cp = doneCount() / totalLessons();
+  var qt = 0, qm = 0;
+  Object.keys(QUIZZES).forEach(function(ci) {
+    qm += QUIZZES[ci].length;
+    qt += S.scores[ci] || 0;
+  });
+  var qp = qm > 0 ? qt / qm : 0;
+  return Math.round((cp * 0.5 + qp * 0.5) * 100);
+}
+function updateGauge() {
+  var kp = getKnowledge();
+  var arc = 79;
+  var off = arc - (kp / 100) * arc;
+  document.getElementById("gArc").style.strokeDashoffset = off;
+  document.getElementById("gVal").textContent = kp + "%";
+  var avg = 12;
+  var txt = document.getElementById("gPctTxt");
+  if (kp <= avg) {
+    txt.textContent = "Below average Indian";
+    txt.style.color = "var(--red)";
+  } else {
+    var pctl = Math.min(99, Math.round(50 + (kp - avg) * 2.2));
+    txt.textContent = "Top " + (100 - pctl) + "% of Indians";
+    txt.style.color = "var(--accent)";
+  }
+}
+
+/* ========== RENDER CONTENT ========== */
+var quizSel = {};
+var quizDone = false;
+
+function render() {
+  quizSel = {};
+  quizDone = false;
+  var ci = S.ci, li = S.li;
+  var ls = DATA[ci].lessons[li];
+  var ck = key(ci, li);
+  var isDone = !!S.done[ck];
+  var isLast = isLastLesson(ci, li);
+  var quiz = isLast ? QUIZZES[ci] : null;
+
+  /* Breadcrumb */
+  document.getElementById("breadcrumb").innerHTML =
+    '<span>Chapter ' + (ci+1) + '</span> <i class="fas fa-chevron-right" style="font-size:7px;margin:0 5px;opacity:.5"></i> <span style="color:var(--text)">' + ls.title + '</span>';
+
+  var h = '<div class="fadein">';
+
+  /* Tags */
+  h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">'
+    + '<span class="tag" style="background:' + ls.tagClr + '18;color:' + ls.tagClr + '">' + ls.tag + '</span>'
+    + '<span style="font-size:11.5px;color:var(--muted)">'
+    + (isDone ? '<i class="fas fa-check-circle" style="color:var(--accent);margin-right:3px"></i>Completed' : '<i class="far fa-circle" style="margin-right:3px"></i>In progress')
+    + '</span></div>';
+
+  /* Blocks */
+  ls.blocks.forEach(function(b) {
+    switch(b.t) {
+      case "h1": h += '<h1 style="font-size:26px;font-weight:700;line-height:1.3;margin-bottom:18px">' + b.v + '</h1>'; break;
+      case "h3": h += '<h3 style="font-size:17px;font-weight:600;margin:22px 0 10px">' + b.v + '</h3>'; break;
+      case "p":  h += '<p style="font-size:14px;line-height:1.8;opacity:.9;margin-bottom:10px">' + b.v + '</p>'; break;
+      case "key": h += '<div class="key-box">' + b.v + '</div>'; break;
+      case "warn": h += '<div class="warn-box">' + b.v + '</div>'; break;
+      case "ul":
+        h += '<ul class="bullet-list">';
+        b.v.forEach(function(item) { h += '<li>' + item + '</li>'; });
+        h += '</ul>';
+        break;
+      case "table":
+        h += '<div style="overflow-x:auto;margin:10px 0"><table class="dtable"><thead><tr>';
+        b.h.forEach(function(th) { h += '<th>' + th + '</th>'; });
+        h += '</tr></thead><tbody>';
+        b.r.forEach(function(row) {
+          h += '<tr>';
+          row.forEach(function(td) { h += '<td>' + td + '</td>'; });
+          h += '</tr>';
+        });
+        h += '</tbody></table></div>';
+        break;
+    }
+  });
+
+  /* Quiz */
+  if (quiz) {
+    h += '<div class="glow-line"></div>';
+    h += '<div class="card" style="border-color:rgba(245,166,35,0.15)">'
+      + '<h3 style="font-size:17px;font-weight:700;margin-bottom:3px"><i class="fas fa-trophy" style="color:var(--gold);margin-right:7px"></i>Chapter ' + (ci+1) + ' Quiz</h3>'
+      + '<p style="color:var(--muted);font-size:12.5px;margin-bottom:18px">Test your understanding \u2014 ' + quiz.length + ' questions</p>';
+    quiz.forEach(function(q, qi) {
+      h += '<div id="qblock-' + qi + '" style="margin-bottom:18px">'
+        + '<p style="font-size:13.5px;font-weight:600;margin-bottom:8px">' + (qi+1) + '. ' + q.q + '</p><div>';
+      q.o.forEach(function(opt, oi) {
+        h += '<div class="q-opt" data-qi="' + qi + '" data-oi="' + oi + '">'
+          + '<div class="q-circle">' + String.fromCharCode(65 + oi) + '</div>'
+          + '<span>' + opt + '</span></div>';
+      });
+      h += '</div><div id="qfb-' + qi + '" style="margin-top:6px;font-size:12.5px;min-height:18px"></div></div>';
+    });
+    h += '<div style="display:flex;gap:10px;align-items:center;margin-top:14px">'
+      + '<button class="btn-g" id="quizBtn" disabled>Submit Quiz</button>'
+      + '<span id="quizRes" style="font-size:13.5px;font-weight:600"></span>'
+      + '</div></div>';
+  }
+
+  /* Nav buttons */
+  h += '<div class="glow-line"></div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:40px">';
+  if (li > 0 || ci > 0) {
+    h += '<button class="btn-o" id="prevBtn"><i class="fas fa-arrow-left" style="margin-right:5px"></i>Previous</button>';
+  } else {
+    h += '<div></div>';
+  }
+  if (!isDone) {
+    h += '<button class="btn-g" id="doneBtn"><i class="fas fa-check" style="margin-right:5px"></i>Mark Complete</button>';
+  } else {
+    h += '<span style="font-size:12.5px;color:var(--accent);font-weight:500"><i class="fas fa-check-circle" style="margin-right:3px"></i>Completed</span>';
+  }
+  h += '</div></div>';
+
+  var content = document.getElementById("content");
+  content.innerHTML = h;
+  document.getElementById("scrollArea").scrollTop = 0;
+
+  /* Wire events */
+  var prevBtn = document.getElementById("prevBtn");
+  if (prevBtn) prevBtn.onclick = goPrev;
+
+  var doneBtn = document.getElementById("doneBtn");
+  if (doneBtn) doneBtn.onclick = function() {
+    S.done[key(ci, li)] = true;
+    save(); buildNav(); render(); updateProg(); updateGauge();
+    toast("Lesson completed!", true);
+  };
+
+  /* Quiz events */
+  if (quiz) {
+    var qBtn = document.getElementById("quizBtn");
+    content.querySelectorAll(".q-opt").forEach(function(el) {
+      el.onclick = function() {
+        if (quizDone) return;
+        var qi = parseInt(el.dataset.qi);
+        var oi = parseInt(el.dataset.oi);
+        quizSel[qi] = oi;
+        /* Update visuals */
+        content.querySelectorAll('.q-opt[data-qi="' + qi + '"]').forEach(function(o) {
+          o.classList.remove("picked");
+        });
+        el.classList.add("picked");
+        /* Enable submit if all answered */
+        if (Object.keys(quizSel).length === quiz.length) qBtn.disabled = false;
+      };
+    });
+    qBtn.onclick = function() { submitQuiz(ci, quiz); };
+  }
+}
+
+/* ========== QUIZ SUBMIT ========== */
+function submitQuiz(ci, quiz) {
+  if (quizDone) return;
+  quizDone = true;
+  var score = 0;
+  quiz.forEach(function(q, qi) {
+    var sel = quizSel[qi];
+    var fb = document.getElementById("qfb-" + qi);
+    document.querySelectorAll('.q-opt[data-qi="' + qi + '"]').forEach(function(el) {
+      var oi = parseInt(el.dataset.oi);
+      el.style.pointerEvents = "none";
+      if (oi === q.a) { el.classList.remove("picked"); el.classList.add("right"); }
+      if (oi === sel && sel !== q.a) { el.classList.remove("picked"); el.classList.add("wrong"); }
+    });
+    if (sel === q.a) {
+      score++;
+      fb.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-check-circle"></i> Correct!</span>';
+    } else {
+      fb.innerHTML = '<span style="color:var(--red)"><i class="fas fa-times-circle"></i> Incorrect. Answer: ' + String.fromCharCode(65 + q.a) + '</span>';
+    }
+  });
+  S.scores[ci] = Math.max(S.scores[ci] || 0, score);
+  save();
+  var total = quiz.length;
+  var res = document.getElementById("quizRes");
+  if (score === total) {
+    res.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-star" style="margin-right:3px"></i>Perfect ' + score + '/' + total + '!</span>';
+    toast("Perfect score!", true);
+  } else if (score >= total * 0.6) {
+    res.innerHTML = '<span style="color:var(--gold)"><i class="fas fa-thumbs-up" style="margin-right:3px"></i>' + score + '/' + total + ' \u2014 Good!</span>';
+    toast("Quiz done \u2014 " + score + "/" + total, true);
+  } else {
+    res.innerHTML = '<span style="color:var(--red)"><i class="fas fa-rotate" style="margin-right:3px"></i>' + score + '/' + total + ' \u2014 Review chapter</span>';
+    toast("Quiz done \u2014 " + score + "/" + total, false);
+  }
+  document.getElementById("quizBtn").disabled = true;
+  updateGauge();
+}
+
+/* ========== REPORT ========== */
+function openReport() {
+  var kp = getKnowledge();
+  var dc = doneCount();
+  var tl = totalLessons();
+  var qt = 0, qm = 0;
+  Object.keys(QUIZZES).forEach(function(ci) { qm += QUIZZES[ci].length; qt += S.scores[ci] || 0; });
+  var qp = qm > 0 ? qt / qm : 0;
+  var avg = 12;
+  var pctl = kp <= avg ? 0 : Math.min(99, Math.round(50 + (kp - avg) * 2.2));
+
+  var h = '<div style="text-align:center;margin-bottom:24px">'
+    + '<div style="position:relative;width:130px;height:75px;margin:0 auto 10px">'
+    + '<svg viewBox="0 0 130 75" width="130" height="75">'
+    + '<path d="M10 70 A55 55 0 0 1 120 70" fill="none" stroke="var(--border)" stroke-width="7" stroke-linecap="round"/>'
+    + '<path d="M10 70 A55 55 0 0 1 120 70" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="173" stroke-dashoffset="' + (173 - kp/100*173) + '" style="transition:stroke-dashoffset 1s ease"/>'
+    + '</svg>'
+    + '<div style="position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-family:Space Grotesk;font-size:26px;font-weight:700;color:var(--accent)">' + kp + '%</div>'
+    + '</div>'
+    + '<div style="font-size:13px;color:var(--muted)">Your Stock Market Knowledge Score</div></div>';
+
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">'
+    + '<div class="card" style="padding:14px;text-align:center;margin:0"><div style="font-size:10.5px;color:var(--muted);margin-bottom:3px">Lessons Done</div><div style="font-size:20px;font-weight:700;font-family:Space Grotesk">' + dc + '/' + tl + '</div></div>'
+    + '<div class="card" style="padding:14px;text-align:center;margin:0"><div style="font-size:10.5px;color:var(--muted);margin-bottom:3px">Quiz Score</div><div style="font-size:20px;font-weight:700;font-family:Space Grotesk">' + qt + '/' + qm + '</div></div></div>';
+
+  h += '<div class="card" style="padding:16px;margin-bottom:14px;border-color:rgba(245,166,35,0.15)">'
+    + '<div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:10px"><i class="fas fa-chart-bar" style="margin-right:5px"></i>YOU vs AVERAGE INDIAN</div>'
+    + '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--muted)">Average Indian</span><span style="color:var(--red);font-weight:600">' + avg + '%</span></div>'
+    + '<div style="height:7px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="height:100%;width:' + avg + '%;background:var(--red);border-radius:4px"></div></div></div>'
+    + '<div><div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px"><span style="color:var(--text);font-weight:500">You</span><span style="color:var(--accent);font-weight:600">' + kp + '%</span></div>'
+    + '<div style="height:7px;background:var(--surface);border-radius:4px;overflow:hidden"><div style="height:100%;width:' + kp + '%;background:var(--accent);border-radius:4px"></div></div></div></div>';
+
+  h += '<div class="card" style="padding:16px;border-color:rgba(0,217,126,0.1)">'
+    + '<div style="font-size:13.5px;font-weight:600;margin-bottom:6px">'
+    + (pctl > 50 ? '<i class="fas fa-crown" style="color:var(--gold);margin-right:5px"></i>Ahead of most Indians!' : '<i class="fas fa-arrow-trend-up" style="color:var(--accent);margin-right:5px"></i>Keep going!')
+    + '</div><p style="font-size:12.5px;color:var(--muted);line-height:1.65">';
+
+  if (kp < 20) h += 'According to SEBI, only ~12% of Indians have basic financial literacy, and less than 5% invest in stocks with proper knowledge. You\'re building an edge with every lesson.';
+  else if (kp < 50) h += 'You already know more about stock markets than most Indians. Only ~4 crore out of 140 crore have even opened a Demat account, and most trade blindly on tips. Your structured learning gives you a real edge.';
+  else if (kp < 80) h += 'You\'re in the top tier of informed Indian investors. You understand FA, risk management, and psychology \u2014 things 95%+ of participants never learn. You have the knowledge to build real long-term wealth.';
+  else h += 'Exceptional. You possess stock market knowledge that puts you in the top 1\u20132% of Indians. The only thing left is execution \u2014 start investing wisely.';
+
+  h += '</p></div>';
+
+  h += '<div style="margin-top:16px;padding:12px;background:var(--surface);border-radius:7px;font-size:11px;color:var(--muted);line-height:1.6">'
+    + '<i class="fas fa-info-circle" style="margin-right:5px;color:var(--blue)"></i>'
+    + '<strong>Sources:</strong> SEBI National Strategy for Financial Education (2020\u201325), NCFE Financial Literacy Survey, RBI reports. Only ~27% of Indians demonstrate basic financial literacy. Stock market participation remains below 5% of the population.'
+    + '</div>';
+
+  document.getElementById("modalBody").innerHTML = h;
+  document.getElementById("modal").classList.add("show");
+}
+
+/* ========== INIT ========== */
+buildNav();
+render();
+updateProg();
+updateGauge();
+
+/* Event listeners */
+document.getElementById("mobBtn").addEventListener("click", function() {
+  document.getElementById("sidebar").classList.toggle("mob-open");
+});
+document.getElementById("reportBtn").addEventListener("click", openReport);
+document.getElementById("closeModal").addEventListener("click", function() {
+  document.getElementById("modal").classList.remove("show");
+});
+document.getElementById("modal").addEventListener("click", function(e) {
+  if (e.target === this) this.classList.remove("show");
+});
+document.addEventListener("keydown", function(e) {
+  if (e.key === "ArrowRight" && (e.ctrlKey || e.metaKey)) {
+    var ci = S.ci, li = S.li;
+    if (li < DATA[ci].lessons.length - 1) go(ci, li + 1);
+    else if (ci < DATA.length - 1) go(ci + 1, 0);
+  }
+  if (e.key === "ArrowLeft" && (e.ctrlKey || e.metaKey)) goPrev();
+});
+</script>
+</body>
+</html>
